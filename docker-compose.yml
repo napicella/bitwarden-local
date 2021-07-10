@@ -1,0 +1,33 @@
+# docker-compose.yml
+version: '3'
+
+services:
+  bitwarden:
+    image: vaultwarden/server:latest
+    restart: always
+    ports:
+      - 4321:4321
+      - 3012:3012
+#      - 4443:443
+    volumes:
+      - ./bw-data:/data
+    environment:
+      WEBSOCKET_ENABLED: 'true' # Required to use websockets
+      ROCKET_PORT : "4321"
+      DOMAIN: "https://localhost"
+  caddy:
+    image: caddy:2
+    container_name: caddy
+    restart: always
+    ports:
+      - 8080:80  # Needed for the ACME HTTP-01 challenge.
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./caddy-config:/config
+      - ./caddy-data:/data
+    environment:
+      - DOMAIN=https://localhost  # Your domain, prefixed with http or https.
+      - EMAIL=admin@example.com                   # The email address to use for ACME registration.
+      - LOG_FILE=/data/access.log      
+      
